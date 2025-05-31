@@ -1,0 +1,210 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Banco Imobiliário{% endblock %}
+
+{% block extra_css %}
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 4rem 0;
+        margin: -2rem -1rem 2rem -1rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('https://images.unsplash.com/photo-1611996575749-79a3a250f948?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') center/cover;
+        opacity: 0.1;
+    }
+
+    .hero-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .display-4 {
+        font-weight: 800;
+        margin-bottom: 1rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .lead {
+        font-size: 1.25rem;
+        opacity: 0.9;
+    }
+
+    .btn-hero {
+        padding: 0.8rem 2rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .btn-hero:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 8px rgba(0,0,0,0.2);
+    }
+
+    .btn-hero i {
+        margin-right: 0.5rem;
+    }
+
+    .card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        height: 100%;
+        background: white;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 12px rgba(0,0,0,0.15);
+    }
+
+    .card-body {
+        padding: 2rem;
+    }
+
+    .card-title {
+        color: var(--primary-color);
+        font-weight: 700;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .card-title i {
+        color: var(--accent-color);
+        font-size: 1.5rem;
+    }
+
+    .card-text {
+        color: var(--text-color);
+        opacity: 0.8;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-outline-primary {
+        border-radius: 50px;
+        padding: 0.5rem 1.5rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .feature-cards {
+        margin-top: 3rem;
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-fadeInUp {
+        animation: fadeInUp 0.6s ease-out forwards;
+    }
+
+    .delay-1 { animation-delay: 0.2s; }
+    .delay-2 { animation-delay: 0.4s; }
+    .delay-3 { animation-delay: 0.6s; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="hero-section">
+    <div class="container">
+        <div class="hero-content text-center">
+            <h1 class="display-4 animate-fadeInUp">Bem-vindo ao Banco Imobiliário</h1>
+            <p class="lead animate-fadeInUp delay-1">O clássico jogo de tabuleiro agora em versão digital!</p>
+
+            {% if user.is_authenticated %}
+            <div class="mt-4 animate-fadeInUp delay-2">
+                <a href="{% url 'jogo:partidas' %}" class="btn btn-primary btn-hero me-3">
+                    <i class="fas fa-gamepad"></i>Ver Partidas
+                </a>
+                <a href="{% url 'jogo:criar_partida' %}" class="btn btn-success btn-hero">
+                    <i class="fas fa-plus-circle"></i>Criar Nova Partida
+                </a>
+            </div>
+            {% else %}
+            <div class="mt-4 animate-fadeInUp delay-2">
+                <a href="{% url 'login' %}" class="btn btn-primary btn-hero me-3">
+                    <i class="fas fa-sign-in-alt"></i>Entrar
+                </a>
+                <a href="{% url 'registro' %}" class="btn btn-success btn-hero">
+                    <i class="fas fa-user-plus"></i>Registrar
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row feature-cards">
+        <div class="col-md-4 animate-fadeInUp delay-1">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-book"></i>Como Jogar
+                    </h5>
+                    <p class="card-text">Aprenda as regras básicas do jogo e comece a jogar imediatamente!</p>
+                    <a href="#" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-right"></i>Ver Regras
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 animate-fadeInUp delay-2">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-trophy"></i>Ranking
+                    </h5>
+                    <p class="card-text">Veja os melhores jogadores e suas conquistas!</p>
+                    <a href="#" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-right"></i>Ver Ranking
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 animate-fadeInUp delay-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-info-circle"></i>Sobre
+                    </h5>
+                    <p class="card-text">Conheça mais sobre o jogo e sua história!</p>
+                    <a href="#" class="btn btn-outline-primary">
+                        <i class="fas fa-arrow-right"></i>Saiba Mais
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

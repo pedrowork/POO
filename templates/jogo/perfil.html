@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Meu Perfil - Banco Imobiliário{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Informações do Jogador</h5>
+            </div>
+            <div class="card-body">
+                <h6>Usuário: {{ jogador.usuario.username }}</h6>
+                <p>Saldo: R$ {{ jogador.saldo }}</p>
+                <p>Partidas Jogadas: {{ partidas.count }}</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Minhas Partidas</h5>
+            </div>
+            <div class="card-body">
+                {% if partidas %}
+                <div class="list-group">
+                    {% for partida in partidas %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ partida.nome }}</h6>
+                                <small class="text-muted">Status: {{ partida.get_status_display }}</small>
+                            </div>
+                            <a href="{% url 'jogo:partida' partida.pk %}" class="btn btn-primary btn-sm">Ver Partida</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted">Você ainda não participou de nenhuma partida.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

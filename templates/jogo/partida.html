@@ -1,0 +1,381 @@
+{% extends 'base.html' %}
+{% load jogo_tags %}
+
+{% block title %}{{ partida.nome }} - Banco Imobiliário{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --board-bg: #f8f9fa;
+        --cell-bg: #ffffff;
+        --border-color: #e9ecef;
+        --primary-color: #2c3e50;
+        --secondary-color: #34495e;
+        --accent-color: #3498db;
+        --success-color: #2ecc71;
+        --warning-color: #f1c40f;
+        --danger-color: #e74c3c;
+    }
+
+    .game-container {
+        padding: 2rem 0;
+    }
+
+    .card {
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        margin-bottom: 1.5rem;
+        background: white;
+    }
+
+    .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        border-radius: 15px 15px 0 0 !important;
+        padding: 1rem 1.5rem;
+    }
+
+    .card-title {
+        margin: 0;
+        font-weight: 600;
+        font-size: 1.2rem;
+    }
+
+    .board-container {
+        width: 100%;
+        padding: 1.5rem;
+        background: var(--board-bg);
+        border-radius: 12px;
+    }
+
+    .board {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 3px;
+        background-color: var(--border-color);
+        padding: 3px;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .board-cell {
+        aspect-ratio: 1;
+        background-color: var(--cell-bg);
+        padding: 8px;
+        position: relative;
+        min-height: 70px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        font-size: 0.8rem;
+        transition: all 0.3s ease;
+        border-radius: 4px;
+    }
+
+    .board-cell:hover {
+        transform: scale(1.05);
+        z-index: 1;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .property-name {
+        font-size: 0.75rem;
+        font-weight: 600;
+        margin-bottom: 4px;
+        color: var(--primary-color);
+    }
+
+    .player-marker {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 0.9rem;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        transition: all 0.3s ease;
+    }
+
+    .player-marker:hover {
+        transform: translate(-50%, -50%) scale(1.1);
+    }
+
+    .has-property {
+        border: 2px solid var(--border-color);
+    }
+
+    .list-group-item {
+        border: none;
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .list-group-item:hover {
+        background-color: var(--board-bg);
+    }
+
+    .list-group-item:last-child {
+        border-bottom: none;
+    }
+
+    .badge {
+        padding: 0.5rem 0.8rem;
+        font-weight: 500;
+        border-radius: 50px;
+    }
+
+    .btn {
+        padding: 0.6rem 1.2rem;
+        font-weight: 500;
+        border-radius: 50px;
+        transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        border: none;
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, var(--success-color), #27ae60);
+        border: none;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    .animate-fadeIn {
+        animation: fadeIn 0.5s ease-out forwards;
+    }
+
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-weight: 500;
+        margin-bottom: 1rem;
+        display: inline-block;
+    }
+
+    .status-aguardando { background-color: var(--warning-color); color: #000; }
+    .status-em_andamento { background-color: var(--success-color); color: white; }
+    .status-finalizada { background-color: var(--danger-color); color: white; }
+
+    .transaction-item {
+        border-left: 4px solid var(--accent-color);
+        margin-bottom: 0.5rem;
+        padding: 0.8rem;
+        background-color: var(--board-bg);
+        border-radius: 0 8px 8px 0;
+    }
+
+    .transaction-item.salario { border-left-color: var(--success-color); }
+    .transaction-item.aluguel { border-left-color: var(--warning-color); }
+    .transaction-item.compra { border-left-color: var(--accent-color); }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container game-container">
+    <div class="row">
+        <!-- Tabuleiro -->
+        <div class="col-md-4 animate-fadeIn">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">Tabuleiro</h5>
+                </div>
+                <div class="card-body">
+                    <div class="board-container">
+                        <div class="board">
+                            {% for pos in 0|add:0|get_range:20 %}
+                            <div class="board-cell {% if propriedades|get_item:pos|stringformat:'s' %}has-property{% endif %}"
+                                 style="{% if propriedades|get_item:pos|stringformat:'s' %}background-color: {{ propriedades|get_item:pos|stringformat:'s'|get_item:'cor' }}20{% endif %}">
+                                {% if propriedades|get_item:pos|stringformat:'s' %}
+                                <div class="property-name">{{ propriedades|get_item:pos|stringformat:'s'|get_item:'nome' }}</div>
+                                {% endif %}
+                                {% for jogador in partida.jogadores.all %}
+                                {% if jogador.posicao == pos %}
+                                <div class="player-marker" style="background-color: {{ jogador.usuario.username|hash_color }}">
+                                    {{ jogador.usuario.username|first }}
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Informações da Partida -->
+        <div class="col-md-4">
+            <div class="card animate-fadeIn delay-1">
+                <div class="card-header">
+                    <h5 class="card-title">Informações da Partida</h5>
+                </div>
+                <div class="card-body">
+                    <div class="status-badge status-{{ partida.status }}">
+                        {{ partida.get_status_display }}
+                    </div>
+                    <h6 class="mb-3">Jogador Atual: {{ partida.jogador_atual.usuario.username }}</h6>
+
+                    {% if partida.status == 'aguardando' %}
+                        {% if jogador not in partida.jogadores.all %}
+                            <form method="post" class="mt-3">
+                                {% csrf_token %}
+                                <input type="hidden" name="acao" value="entrar">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Entrar na Partida
+                                </button>
+                            </form>
+                        {% elif partida.jogadores.count >= 2 %}
+                            <form method="post" class="mt-3">
+                                {% csrf_token %}
+                                <input type="hidden" name="acao" value="iniciar">
+                                <button type="submit" class="btn btn-success w-100">
+                                    <i class="fas fa-play me-2"></i>Iniciar Partida
+                                </button>
+                            </form>
+                        {% else %}
+                            <p class="text-muted mt-3">
+                                <i class="fas fa-users me-2"></i>Aguardando mais jogadores...
+                            </p>
+                        {% endif %}
+                    {% elif partida.status == 'em_andamento' and partida.jogador_atual == jogador %}
+                        <a href="{% url 'jogo:jogar' partida.pk %}" class="btn btn-primary w-100 mt-3">
+                            <i class="fas fa-dice me-2"></i>Jogar
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Lista de Jogadores -->
+            <div class="card animate-fadeIn delay-2">
+                <div class="card-header">
+                    <h5 class="card-title">Jogadores</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% for jogador in partida.jogadores.all %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0">{{ jogador.usuario.username }}</h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-coins me-1"></i>R$ {{ jogador.saldo }}
+                                    </small>
+                                </div>
+                                {% if jogador == partida.jogador_atual %}
+                                <span class="badge bg-primary">
+                                    <i class="fas fa-clock me-1"></i>Sua vez
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Propriedades -->
+            <div class="card animate-fadeIn delay-2">
+                <div class="card-header">
+                    <h5 class="card-title">Propriedades</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% for propriedade in propriedades.values %}
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0">{{ propriedade.nome }}</h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-tag me-1"></i>R$ {{ propriedade.preco }}<br>
+                                        <i class="fas fa-home me-1"></i>R$ {{ propriedade.valor_aluguel }}
+                                    </small>
+                                </div>
+                                {% if propriedade.dono %}
+                                <span class="badge" style="background-color: {{ propriedade.dono.usuario.username|hash_color }}">
+                                    {{ propriedade.dono.usuario.username }}
+                                </span>
+                                {% else %}
+                                <span class="badge bg-secondary">
+                                    <i class="fas fa-store me-1"></i>Disponível
+                                </span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Histórico de Transações -->
+            <div class="card animate-fadeIn delay-3">
+                <div class="card-header">
+                    <h5 class="card-title">Histórico de Transações</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group">
+                        {% for transacao in partida.transacao_set.all|slice:":5" %}
+                        <div class="transaction-item transaction-{{ transacao.tipo }}">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0">
+                                        <i class="fas {% if transacao.tipo == 'salario' %}fa-money-bill-wave{% elif transacao.tipo == 'aluguel' %}fa-home{% else %}fa-exchange-alt{% endif %} me-2"></i>
+                                        {{ transacao.get_tipo_display }}
+                                    </h6>
+                                    <small class="text-muted">
+                                        {% if transacao.jogador_origem %}
+                                        <i class="fas fa-user me-1"></i>{{ transacao.jogador_origem.usuario.username }}
+                                        {% endif %}
+                                        {% if transacao.jogador_destino %}
+                                        <i class="fas fa-arrow-right mx-1"></i>
+                                        <i class="fas fa-user me-1"></i>{{ transacao.jogador_destino.usuario.username }}
+                                        {% endif %}
+                                        {% if transacao.propriedade %}
+                                        <br><i class="fas fa-building me-1"></i>{{ transacao.propriedade.nome }}
+                                        {% endif %}
+                                    </small>
+                                </div>
+                                <span class="badge {% if transacao.tipo == 'salario' %}bg-success{% else %}bg-primary{% endif %}">
+                                    <i class="fas fa-coins me-1"></i>R$ {{ transacao.valor }}
+                                </span>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

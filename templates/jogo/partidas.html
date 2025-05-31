@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+
+{% block title %}Partidas - Banco Imobiliário{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1>Partidas</h1>
+    <a href="{% url 'jogo:criar_partida' %}" class="btn btn-success">Criar Nova Partida</a>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Partidas Aguardando Jogadores</h5>
+            </div>
+            <div class="card-body">
+                {% if partidas_aguardando %}
+                <div class="list-group">
+                    {% for partida in partidas_aguardando %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ partida.nome }}</h6>
+                                <small class="text-muted">{{ partida.jogadores.count }} jogador(es)</small>
+                            </div>
+                            <a href="{% url 'jogo:partida' partida.pk %}" class="btn btn-primary btn-sm">Entrar</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted">Não há partidas aguardando jogadores.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Partidas em Andamento</h5>
+            </div>
+            <div class="card-body">
+                {% if partidas_ativas %}
+                <div class="list-group">
+                    {% for partida in partidas_ativas %}
+                    <div class="list-group-item">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="mb-1">{{ partida.nome }}</h6>
+                                <small class="text-muted">Vez de: {{ partida.jogador_atual.usuario.username }}</small>
+                            </div>
+                            <a href="{% url 'jogo:partida' partida.pk %}" class="btn btn-primary btn-sm">Ver Partida</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted">Não há partidas em andamento.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 
